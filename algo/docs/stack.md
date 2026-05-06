@@ -171,21 +171,134 @@ console.log("出栈 (空栈):", stack.pop()); // Underflow
     *   [https://leetcode.cn/problems/daily-temperatures/](https://leetcode.cn/problems/daily-temperatures/)
     *   **描述**：给定一个整数数组 `temperatures`，表示每天的温度。返回一个数组 `answer`，其中 `answer[i]` 是指在 `i` 天之后，才会有更高的温度。如果之后没有更高的温度， `answer[i]` 就等于 `0`。
     *   **解法**：使用**单调栈**。栈中存储的是温度的索引，并且保持栈内元素（索引对应的温度）单调递减。
+    *   **实现代码**：
+
+        ```javascript
+        function dailyTemperatures(temperatures) {
+            const n = temperatures.length;
+            const answer = new Array(n).fill(0);
+            const stack = []; // 存储索引，保持 temperatures[stack] 单调递减
+
+            for (let i = 0; i < n; i++) {
+                while (stack.length && temperatures[i] > temperatures[stack[stack.length - 1]]) {
+                    const prevIndex = stack.pop();
+                    answer[prevIndex] = i - prevIndex;
+                }
+                stack.push(i);
+            }
+
+            return answer;
+        }
+        ```
+    *   **代码解读**：
+        *   `stack` 中保存的是待寻找下一个更高温度的索引，且这些索引对应的温度按栈底到栈顶保持递减。
+        *   每个新温度 `temperatures[i]` 到来时，若它比栈顶索引对应的温度高，就说明栈顶索引的“下一个更高温度”已找到，计算天数差并出栈。
+        *   最后剩余在栈中的索引表示后面没有更高温度，默认值 `0` 保持不变。
 
 4.  **42. 接雨水 (Trapping Rain Water)** (Hard)
     *   [https://leetcode.cn/problems/trapping-rain-water/](https://leetcode.cn/problems/trapping-rain-water/)
     *   **描述**：给定 `n` 个非负整数表示每个宽度为 `1` 的柱子的高度图，计算按此排列的柱子，下雨之后能接多少雨水。
     *   **解法**：多种方法，其中一种是使用**单调栈**。栈中存储柱子的索引，当遇到比栈顶高的柱子时，就可以计算出一段能接的雨水。
+    *   **实现代码**：
+
+        ```javascript
+        function trap(height) {
+            let total = 0;
+            const stack = []; // 存储柱子索引，保持高度递减
+            for (let i = 0; i < height.length; i++) {
+                while (stack.length && height[i] > height[stack[stack.length - 1]]) {
+                    const mid = stack.pop();
+                    if (!stack.length) break;
+                    const left = stack[stack.length - 1];
+                    const width = i - left - 1;
+                    const boundedHeight = Math.min(height[i], height[left]) - height[mid];
+                    total += width * boundedHeight;
+                }
+                stack.push(i);
+            }
+            return total;
+        }
+        ```
+    *   **代码解读**：
+        *   栈中保存的是高度单调递减的柱子索引，遇到当前柱子更高时，就能形成一个“凹槽”来存水。
+        *   `mid` 是下一个可能盛水的低点，`left` 是左边界的柱子索引，`i` 是右边界索引。
+        *   水深由 `Math.min(height[i], height[left]) - height[mid]` 计算，宽度由 `i - left - 1` 计算。
 
 5.  **84. 柱状图中最大的矩形 (Largest Rectangle in Histogram)** (Hard)
     *   [https://leetcode.cn/problems/largest-rectangle-in-histogram/](https://leetcode.cn/problems/largest-rectangle-in-histogram/)
     *   **描述**：给定 `n` 个非负整数，用来表示柱状图中各个柱子的高度。每个柱子彼此相邻，且宽度为 `1`。求在该柱状图中，能够勾勒出来的矩形的最大面积。
     *   **解法**：同样是使用**单调栈**。栈中维护一个递增的柱子高度索引序列。
+    *   **实现代码**：
+
+        ```javascript
+        function largestRectangleArea(heights) {
+            const stack = [];
+            let maxArea = 0;
+            const extended = [0, ...heights, 0];
+
+            for (let i = 0; i < extended.length; i++) {
+                while (stack.length && extended[i] < extended[stack[stack.length - 1]]) {
+                    const height = extended[stack.pop()];
+                    const left = stack[stack.length - 1];
+                    const width = i - left - 1;
+                    maxArea = Math.max(maxArea, height * width);
+                }
+                stack.push(i);
+            }
+
+            return maxArea;
+        }
+        ```
+    *   **代码解读**：
+        *   在 `extended` 数组两端补 `0` 是为了方便清空栈，并处理边界情况。
+        *   栈中保存的是递增高度对应的索引。当发现当前高度较低时，说明栈顶高度可以向右扩展到当前索引左侧，计算面积。
+        *   弹出栈顶后，左边界由新的栈顶索引决定，宽度为 `i - left - 1`。
 
 6.  **150. 逆波兰表达式求值 (Evaluate Reverse Polish Notation)** (Medium)
     *   [https://leetcode.cn/problems/evaluate-reverse-polish-notation/](https://leetcode.cn/problems/evaluate-reverse-polish-notation/)
     *   **描述**：根据逆波兰表示法，求表达式的值。
     *   **解法**：遍历表达式，遇到数字入栈；遇到运算符时，从栈中弹出两个操作数进行计算，然后将结果重新入栈。
+    *   **实现代码**：
+
+        ```javascript
+        function evalRPN(tokens) {
+            const stack = [];
+            const operators = new Set(['+', '-', '*', '/']);
+
+            for (const token of tokens) {
+                if (!operators.has(token)) {
+                    stack.push(Number(token));
+                } else {
+                    const b = stack.pop();
+                    const a = stack.pop();
+                    let result;
+                    switch (token) {
+                        case '+':
+                            result = a + b;
+                            break;
+                        case '-':
+                            result = a - b;
+                            break;
+                        case '*':
+                            result = a * b;
+                            break;
+                        case '/':
+                            // 注意：LeetCode 中除法需要向零截断
+                            result = Math.trunc(a / b);
+                            break;
+                    }
+                    stack.push(result);
+                }
+            }
+
+            return stack.pop();
+        }
+        ```
+    *   **代码解读**：
+        *   遍历 `tokens` 数组时，若当前项不是运算符，则将其转换为数字后入栈。
+        *   遇到运算符时，从栈中依次弹出 `b` 和 `a`，注意顺序：先弹出的为右操作数 `b`，后弹出的为左操作数 `a`。
+        *   根据运算符执行对应运算，并将结果再次压入栈中。最后栈中只剩一个结果，即表达式的值。
+        *   对于 `/` 运算，LeetCode 的规则要求向零截断，因此使用 `Math.trunc(a / b)`。
 
 这些题目涵盖了栈的基本操作、辅助栈、单调栈等多种高级应用。掌握它们能让你对栈的理解更深入。
 
