@@ -4,6 +4,9 @@
 
 ## Skills 目录
 - [Code Review Skill](./code-review.md)
+- [Performance Optimization Skill](./performance-optimization.md)
+- [Security Check Skill](./security-check.md)
+- [Code Quality Skill](./code-quality.md)
 
 ## 1. 计算机基础
 - **数据结构与算法**: 数组、链表、栈、队列、树、图、哈希表、排序、搜索、动态规划。
