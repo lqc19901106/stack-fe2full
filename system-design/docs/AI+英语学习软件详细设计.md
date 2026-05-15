@@ -30,11 +30,19 @@
   - [3.3 降级与人工兜底](#33-降级与人工兜底)
 - [4. 学习计划与督促](#4-学习计划与督促)
   - [4.1 计划生成与更新](#41-计划生成与更新)
-  - [4.2 提醒策略与推送](#42-提醒策略与推送)
-  - [4.3 间隔复习与任务优先级](#43-间隔复习与任务优先级)
+  - [4.2 间隔复习与任务优先级](#42-间隔复习-srs-与任务优先级)
+  - [4.3 提醒策略与推送](#43-提醒策略与推送)
   - [4.4 激励与督促机制](#44-激励与督促机制)
   - [4.5 弹性调整与人工督学](#45-弹性调整与人工督学)
+  - [4.6 计划生成案例与流程图](#46-计划生成案例与流程图)
 - [5. 自适应与推荐算法](#5-自适应与推荐算法)
+  - [5.1 学习者模型](#51-学习者模型)
+  - [5.2 AI 个性化推荐学习方案](#52-ai-个性化推荐学习方案)
+  - [5.3 推荐策略与排序](#53-推荐策略与排序)
+  - [5.4 动态调节与干预](#54-动态调节与干预)
+  - [5.5 AI 学习效果与水平评价闭环](#55-ai-学习效果与水平评价闭环)
+  - [5.6 可解释推荐与用户控制](#56-可解释推荐与用户控制)
+  - [5.7 质量评估与风控](#57-质量评估与风控)
 - [6. 系统架构](#6-系统架构)
   - [6.1 功能模块划分](#61-功能模块划分)
   - [6.2 整体架构](#62-整体架构)
@@ -42,23 +50,26 @@
   - [6.4 模型平台与数据层](#64-模型平台与数据层)
   - [6.5 实时与批处理](#65-实时与批处理)
   - [6.6 核心流程（时序）](#66-核心流程时序)
+  - [6.7 用户登录和权限管理模块](#67-用户登录和权限管理模块)
 - [7. 数据库设计](#7-数据库设计)
   - [7.1 用户与档案](#71-用户与档案)
-  - [7.2 练习与评价](#72-练习与评价)
-  - [7.3 计划与提醒](#73-计划与提醒)
-  - [7.4 内容与题库标签体系](#74-内容与题库标签体系)
+  - [7.2 评估结果与能力档案](#72-评估结果与能力档案)
+  - [7.3 计划与任务表结构优化](#73-计划与任务表结构优化)
+  - [7.4 内容与题库](#74-内容与题库)
   - [7.5 错题与间隔复习（SRS）](#75-错题与间隔复习srs)
   - [7.6 推荐日志与 A/B 实验](#76-推荐日志与-ab-实验)
   - [7.7 教师/人工复核与仲裁](#77-教师人工复核与仲裁)
+  - [7.8 登录与权限扩展表](#78-登录与权限扩展表)
 - [8. 后端 API 设计](#8-后端-api-设计)
   - [8.0 通用约定](#80-通用约定)
   - [8.1 评价与练习](#81-评价与练习)
-  - [8.2 计划与提醒](#82-计划与提醒)
+  - [8.2 计划与能力评估 API](#82-计划与能力评估-api)
   - [8.3 学习档案与报告](#83-学习档案与报告)
   - [8.4 内容与题库管理（管理端）](#84-内容与题库管理管理端)
   - [8.5 人工复核/评分仲裁（管理端）](#85-人工复核评分仲裁管理端)
   - [8.6 上传与媒体（预签名）](#86-上传与媒体预签名)
   - [8.7 推荐与间隔复习](#87-推荐与间隔复习)
+  - [8.8 用户登录与权限管理](#88-用户登录与权限管理)
 - [9. 实现要点](#9-实现要点)
   - [9.1 语音与媒体](#91-语音与媒体)
   - [9.2 稳定性与成本](#92-稳定性与成本)
@@ -209,6 +220,18 @@ flowchart TB
 ### 1.5 核心功能清单
 
 以下为核心功能的结构化说明，与第 2～4 章评价体系、计划与督促设计一一对应。
+
+#### 1.5.0 用户登录与权限管理
+
+| 项目 | 说明 |
+|------|------|
+| **登录方式** | 手机号/邮箱 + 密码、验证码登录、第三方 OAuth（微信/Apple/Google，可按端选择）；管理端默认账号密码 + MFA。 |
+| **账号体系** | 复用现有 `users` 基础用户表，英语学习域扩展 `user_english_profiles`；登录态使用 Access Token + Refresh Token。 |
+| **角色划分** | 学习者、教师/评阅员、内容管理员、运营管理员、系统管理员；角色与权限通过 RBAC 管理。 |
+| **权限边界** | 学习者只能访问本人档案、计划、作答和报告；教师仅访问分配给自己的复核任务；内容管理员维护题库；运营管理员查看脱敏统计。 |
+| **安全能力** | 密码哈希、验证码限流、设备会话管理、Token 轮换、账号冻结、敏感操作二次验证、审计日志。 |
+
+详见 [6.7 用户登录和权限管理模块](#67-用户登录和权限管理模块)、[7.8 登录与权限扩展表](#78-登录与权限扩展表)、[8.8 用户登录与权限管理](#88-用户登录与权限管理)。
 
 #### 1.5.1 测评模块（入学测与周期性复测）
 
@@ -675,6 +698,90 @@ flowchart TB
    🎯 按目标 B2，预计还需 3-4 周，冲刺吧！"
    ```
 
+#### 2.5.5 AI 学习效果与水平评价
+
+学习效果评价不是简单比较两次分数，而是综合「能力变化、练习投入、掌握度、稳定性、目标差距」判断用户是否真的进步，并将结论反向驱动推荐与计划调整。
+
+**评价周期**：
+
+| 周期 | 触发条件 | 评价目的 | 输出 |
+|------|----------|----------|------|
+| 单次练习后 | 提交并完成评分 | 判断本次任务掌握情况 | 单题/单任务反馈、错因标签、是否入 SRS |
+| 每日 | 当日任务结束或 23:00 | 判断执行质量 | 完成率、有效学习时长、低效任务提醒 |
+| 每周 | 周计划结束 | 判断短期学习效果 | 周报告、弱项变化、下周计划调整建议 |
+| 阶段测 | 每 2-4 周或完成关键里程碑 | 判断等级是否变化 | CEFR 子等级、目标差距、升降级建议 |
+| 考前 | 考前 14/7/3 天 | 判断备考风险 | 预测分、风险项、冲刺任务重排 |
+
+**核心指标体系**：
+
+| 指标 | 计算口径 | 用途 |
+|------|----------|------|
+| 能力值变化 `ability_delta` | 本周期能力值 - 基线能力值，按听说读写分别计算 | 判断真实进步 |
+| 掌握度 `mastery` | 同一知识点/微技能最近 N 次正确率、得分、SRS 复习表现加权 | 判断是否可进入更高难度 |
+| 稳定性 `stability` | 最近 N 次同维度得分方差与置信区间 | 防止偶然高分导致误判 |
+| 学习投入 `engagement` | 完成率、有效时长、连续天数、主动练习次数 | 判断计划是否可执行 |
+| 目标差距 `gap_to_goal` | 目标等级/考试目标分 - 当前预测水平 | 生成下一阶段方案 |
+| 迁移表现 `transfer_score` | 新题型、未见主题、综合任务中的表现 | 判断是否从刷题进步到能力迁移 |
+
+**学习效果评分公式（示例）**：
+
+```
+effectiveness_score =
+  0.35 * normalized(ability_delta)
+  + 0.20 * mastery_gain
+  + 0.15 * stability_score
+  + 0.15 * transfer_score
+  + 0.10 * engagement_score
+  + 0.05 * goal_alignment
+```
+
+其中 `ability_delta` 和 `mastery_gain` 是主指标；`engagement_score` 只作为解释因素，避免用户「学得久但没提升」时被误判为效果好。
+
+**等级更新规则**：
+
+```
+if confidence >= 0.75
+   and stability_score >= 0.65
+   and transfer_score >= 0.60
+   and 当前等级边界题通过率 >= 70%:
+    允许升级或展示"接近升级"
+else if confidence < 0.50:
+    展示等级区间，并推荐补充测评
+else:
+    保持等级，更新薄弱项和下一阶段计划
+```
+
+**AI 评价输出结构**：
+
+```json
+{
+  "period": "weekly",
+  "overall_effect": "improving",
+  "effectiveness_score": 72.5,
+  "level_decision": {
+    "current_level": "B1",
+    "predicted_level": "B1+",
+    "confidence": 0.78,
+    "can_upgrade": false,
+    "reason": "口语流利度和写作连贯性仍低于 B2 边界要求"
+  },
+  "skill_effects": {
+    "listening": { "delta": 4.2, "trend": "up", "evidence": ["弱读识别正确率 +8%"] },
+    "speaking": { "delta": 1.1, "trend": "flat", "evidence": ["平均停顿仍为 0.7s"] }
+  },
+  "next_actions": [
+    "下周口语任务提高到 40% 时长",
+    "增加 2 次 B1+/B2 边界题测评",
+    "写作重点训练 cohesive devices"
+  ]
+}
+```
+
+**产品呈现原则**：
+- 面向用户展示「你在哪些能力上变好了」「为什么还没升级」「下一步做什么」，避免只显示抽象分数。
+- 对低置信度结论展示等级区间和证据缺口，如「当前大概率 B1，口语样本不足，建议完成 2 个口语任务后再确认」。
+- 将评价结果与计划生成联动，评价服务只给诊断与建议，计划服务负责把建议转成可执行任务。
+
 ### 2.6 评分与反馈呈现
 
 - **分数体系**：原始分 + 能力等级（CEFR）+ 能力雷达图 + **技能短板诊断**（如“听力-弱读识别弱”、“写作-逻辑连接词匮乏”）。
@@ -737,9 +844,11 @@ flowchart TB
 
 ### 3.2 计划与内容生成
 
-- **学习计划生成**：输入为当前等级、目标等级、可用时间（如每天 30 分钟）、薄弱维度、计划周期（如 4 周）。输出为结构化周计划与日任务列表（类型、建议时长、难度、可选素材范围）。
-- **报告总结生成**：输入为周期内练习与得分汇总。输出为一段用户可读的学习总结与 2～3 条下阶段建议。
-- **题目/素材推荐**：根据等级与薄弱项，由 LLM 推荐题目 ID 或素材标签，再由系统从题库中筛选具体题目。
+- **学习计划生成**：输入为当前等级、目标等级、可用时间（如每天 30 分钟）、薄弱维度、计划周期（如 4 周）、近期完成率、学习偏好与禁忌（如不想每天写作）。输出为结构化周计划与日任务列表（类型、建议时长、难度、可选素材范围），并给出每个任务的推荐理由。
+- **AI 个性化方案生成**：LLM 负责把能力诊断翻译成教学策略，例如「先降级补语音解码，再回到 B1 听力材料」；系统侧负责校验总时长、难度跨度、题目可用性、考试日期等硬约束。
+- **学习效果评价总结**：输入为周期内练习、得分、完成率、能力值变化、掌握度和置信度。输出用户可读的阶段报告，必须包含「进步证据」「未达标原因」「下一阶段动作」三部分。
+- **题目/素材推荐**：根据等级与薄弱项，由 LLM 推荐题目 ID 或素材标签，再由系统从题库中筛选具体题目；禁止 LLM 直接虚构不存在的题目 ID。
+- **结构化输出约束**：计划、推荐、效果评价均要求 JSON Schema 校验；计划类输出需包含 `rationale`、`expectedOutcome`、`risk`、`fallback` 字段，便于前端解释和服务端回滚。
 
 ### 3.3 降级与人工兜底
 
@@ -898,26 +1007,268 @@ sequenceDiagram
 | 08:25-08:50 | Speaking | 2分钟独白 | 25min | Q3201 | <0.3s/次 停顿 |
 | 08:50-09:00 | Vocab | SRS 复习 | 10min | SRS队列 | 80%+ 正确率 |
 
-
-
-- **多渠道提醒**：App 推送、邮件、短信（按现有推送能力接入），用户可配置渠道与时间。
-- **学习打卡**：连续学习天数统计、打卡日历展示，可关联徽章与成就。
-- **激励机制**：徽章、积分、连续学习天数展示；积分可兑换权益或人工督学等增值服务（可选）。
-- **人工督学**（付费）：教师/督学定期查看进度、发送语音或文字督促、调整计划建议。
-
-### 4.5 弹性调整与人工督学
-
-- **弹性调整**：根据完成率与测评结果动态调整计划（如完成率持续偏低则降低每日任务量或延长周期；进步明显则提高难度或缩短目标达成时间）。
-- **人工督学选项**：付费用户可开通人工督学，由教师查看学习数据、发送督促并参与计划微调。
-
 ---
 
 ## 5. 自适应与推荐算法
 
-- **学习者模型**：维护用户能力向量（听/说/读/写子维度）与学习偏好、错题历史、学习节奏（如每日可用时段与时长），用于推荐与难度调节。
-- **推荐策略**：强化学习或多臂老虎机（MAB）用于优化「下次练习选择」（题目或技能维度）；冷启动采用基于规则的课程路径（按等级与目标生成固定序列）。
-- **题目/内容标签化**：主题、语法点、词汇等级、语速、口音等标签，用于精细匹配与检索；向量/语义检索（如 Milvus/FAISS + Embedding）可辅助相似题与推荐。
-- **个性化难度调节**：基于即时正确率调整题目难度，保证 70%～85% 的「可学习难度」区间，避免过难或过易。
+自适应推荐的目标不是单纯提高点击率，而是在用户可坚持的前提下，持续把学习任务推到「略高于当前能力、但可完成」的区间，并能解释为什么推荐这些任务。
+
+### 5.1 学习者模型
+
+学习者模型以「能力、目标、行为、偏好、约束」五类特征构成，每次测评、练习、复习和计划执行都会更新。
+
+| 特征域 | 示例字段 | 用途 |
+|--------|----------|------|
+| 能力向量 | `listening=58`, `speaking_fluency=42`, `writing_coherence=45` | 判断当前水平与薄弱微技能 |
+| 目标画像 | `target_level=B2`, `exam_type=ielts`, `exam_date` | 决定计划路径与任务优先级 |
+| 行为节奏 | 活跃时段、平均有效时长、连续天数、跳过率 | 生成可执行的日计划 |
+| 掌握状态 | 词汇、句型、错题、题型策略的 mastery | 决定复习与新题比例 |
+| 偏好约束 | 喜欢话题、设备环境、是否可录音、每日上限 | 降低执行摩擦 |
+
+**能力向量结构示例**：
+
+```json
+{
+  "overall": { "level": "B1", "score": 56.2, "confidence": 0.78 },
+  "skills": {
+    "listening": {
+      "score": 60.5,
+      "subskills": {
+        "gist": 0.74,
+        "detail": 0.66,
+        "weak_form_decoding": 0.48,
+        "note_taking": 0.52
+      }
+    },
+    "speaking": {
+      "score": 49.1,
+      "subskills": {
+        "pronunciation": 0.68,
+        "fluency": 0.43,
+        "grammar_accuracy": 0.55,
+        "pragmatics": 0.50
+      }
+    }
+  },
+  "constraints": {
+    "weekly_minutes": 300,
+    "preferred_slots": ["08:00-09:00", "21:00-22:00"],
+    "can_record_audio": true
+  }
+}
+```
+
+### 5.2 AI 个性化推荐学习方案
+
+AI 个性化方案由「诊断 → 目标拆解 → 路径规划 → 任务编排 → 反馈调整」五步组成。
+
+#### 5.2.1 诊断输入
+
+推荐服务在生成方案前聚合以下信息：
+- 最近一次综合测评与四维子维度得分。
+- 最近 7/14/30 天练习记录、错题、SRS 到期项、完成率与跳过原因。
+- 目标等级、考试日期、可用时长、用户偏好与设备限制。
+- 内容库可用题目、题目难度、标签、历史通过率和质量分。
+- 周期学习效果评价结果，如 `effectiveness_score`、`transfer_score`、`gap_to_goal`。
+
+#### 5.2.2 目标拆解
+
+系统把大目标拆成可执行的微目标，避免「从 B1 到 B2」过于抽象。
+
+| 目标层级 | 示例 | 验收方式 |
+|----------|------|----------|
+| 长期目标 | 8 周内 B1 → B2，雅思口语 6.0 | 阶段测/模考预测分 |
+| 周目标 | 本周把口语流利度从 0.43 提升到 0.50 | 口语任务评分趋势 |
+| 日目标 | 完成 2 次跟读 + 1 次 90 秒话题表达 | 今日任务完成与反馈 |
+| 微技能目标 | 降低停顿、补充连接词、修正过去时错误 | 子维度评分和错因标签 |
+
+#### 5.2.3 方案生成策略
+
+**任务配比规则**：
+
+```
+base_allocation = 四维均分 25%
+weak_skill_boost = 薄弱维度 +10%~20%
+srs_minimum = 每周至少 15% 时间用于复习
+exam_mode = 临考 4 周内考试题型占比提升到 40%~60%
+fatigue_guard = 连续 3 天低完成率则减少新题，增加短任务
+```
+
+**学习路径模板**：
+
+| 用户状态 | 推荐路径 | 说明 |
+|----------|----------|------|
+| 冷启动、无测评 | 入学测 + 轻量体验计划 | 先收集能力样本，避免过早个性化 |
+| 水平稳定但目标高 | 诊断弱项 + 边界题训练 | 找到升级瓶颈 |
+| 完成率低 | 降低任务粒度 + 固定提醒 | 先恢复学习节奏 |
+| 得分高但迁移弱 | 新主题/综合任务 | 避免只适应熟悉题型 |
+| 考前冲刺 | 模考 + 错题复盘 + 高频题型 | 优先提高预测分 |
+
+**推荐方案示例**：
+
+```json
+{
+  "planName": "B1 到 B2 口语写作突破计划",
+  "durationWeeks": 4,
+  "strategy": "weak_skill_focused",
+  "weeklyAllocation": {
+    "speaking": 0.40,
+    "writing": 0.30,
+    "listening": 0.15,
+    "reading": 0.15
+  },
+  "rationale": [
+    "口语 fluency 子维度低于 B2 边界 12 分",
+    "写作 coherence 连续 3 次低于同级均值",
+    "听读已接近 B2，可维持训练"
+  ],
+  "expectedOutcome": {
+    "speaking_fluency": "+6~8 分",
+    "writing_coherence": "+5~7 分",
+    "overall": "B1+，具备冲击 B2 条件"
+  },
+  "dailyTaskPolicy": {
+    "maxMinutesPerDay": 45,
+    "newPracticeRatio": 0.65,
+    "reviewRatio": 0.25,
+    "assessmentRatio": 0.10
+  }
+}
+```
+
+### 5.3 推荐策略与排序
+
+推荐采用多阶段架构：召回候选 → 规则过滤 → 排序打分 → 多样性重排 → 曝光记录。
+
+```mermaid
+flowchart LR
+    A[学习者模型] --> B[候选召回]
+    C[题库/内容标签] --> B
+    D[SRS/错题] --> B
+    B --> E[硬约束过滤]
+    E --> F[排序打分]
+    F --> G[多样性与节奏重排]
+    G --> H[下发任务]
+    H --> I[反馈日志]
+    I --> A
+```
+
+**候选召回来源**：
+- 规则路径：按 CEFR、技能、题型、考试类型召回。
+- SRS 队列：到期词汇、错题、写作错误、口语表达问题。
+- 相似题召回：根据错题标签和 embedding 查找同类但不重复的题。
+- 探索召回：少量新主题、新题型，用于检测迁移能力。
+
+**排序公式（示例）**：
+
+```
+score =
+  0.30 * skill_gap_match
+  + 0.20 * difficulty_fit
+  + 0.15 * mastery_need
+  + 0.10 * goal_alignment
+  + 0.10 * engagement_fit
+  + 0.10 * content_quality
+  + 0.05 * exploration_bonus
+```
+
+**关键约束**：
+- 难度控制在用户当前能力上方 0.3-0.8 个等级，目标正确率 70%-85%。
+- 单日不连续安排过多高负荷任务，如长听力 + 长作文 + 模考。
+- 低质量、争议评分、高投诉题目降低权重或下线。
+- 对儿童/未成年人内容增加主题安全过滤。
+
+### 5.4 动态调节与干预
+
+推荐系统需根据用户表现实时调整，而不是等周报后才变化。
+
+| 触发条件 | 系统判断 | 推荐/计划动作 |
+|----------|----------|---------------|
+| 连续 2 次同类题低于 60 分 | 当前微技能未掌握 | 降低难度，插入讲解与例题 |
+| 连续 3 天完成率低于 50% | 计划负荷过高或时段不合适 | 减少任务量，改为 10-15 分钟短任务 |
+| 某维度 5 次任务均高于 85 分 | 难度偏低 | 提升半级难度或换综合任务 |
+| 用户频繁跳过口语 | 环境或心理阻力 | 推荐免录音替代任务，并提示设置可录音时段 |
+| 临近考试且预测分未达标 | 达标风险高 | 提升模考、错题复盘和高频题型占比 |
+
+**干预类型**：
+- **内容干预**：换题、换话题、增加讲解、增加范例。
+- **难度干预**：升降 CEFR 档位、减少综合任务复杂度。
+- **节奏干预**：调整每日任务数、提醒时间、休息日。
+- **人工干预**：高价值用户、申诉用户或长期无效学习用户进入教师复核/督学队列。
+
+### 5.5 AI 学习效果与水平评价闭环
+
+学习效果评价结果是下一轮推荐的重要输入，形成闭环：
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as 用户
+    participant P as 练习服务
+    participant E as 评价服务
+    participant R as 报告/效果评价
+    participant Rec as 推荐服务
+    participant Plan as 计划服务
+
+    U->>P: 完成练习/测评
+    P->>E: 触发评分
+    E-->>P: 分数、错因、子维度诊断
+    P->>R: 汇总周期学习数据
+    R->>R: 计算 ability_delta/mastery/stability
+    R-->>Rec: 输出弱项、掌握度、目标差距
+    Rec->>Plan: 生成下一阶段推荐任务
+    Plan-->>U: 更新今日/本周学习方案
+```
+
+**闭环规则**：
+- 如果 `effectiveness_score` 高且 `confidence` 高：提高难度或减少低阶复习。
+- 如果投入高但效果低：优先调整学习策略，而不是简单增加任务量。
+- 如果完成率低但单次表现好：降低频次、保持难度，避免用户流失。
+- 如果某技能提升但综合等级不变：在报告中解释瓶颈技能，推荐跨技能综合任务。
+
+**AI 评价与推荐的边界**：
+- AI 负责总结原因和生成策略建议，最终下发任务必须经过规则引擎校验。
+- 等级升级需满足样本量、置信度、边界题和迁移任务要求，不能只依赖 LLM 主观判断。
+- 用户可手动反馈「太难/太简单/不感兴趣/没时间」，反馈进入下一次推荐。
+
+### 5.6 可解释推荐与用户控制
+
+推荐结果必须能解释，降低用户对 AI 计划的黑盒感。
+
+**前端展示示例**：
+
+```
+今天推荐这 3 个任务：
+1. B1+ 话题独白：因为你最近流利度提升慢，且本周目标是减少停顿。
+2. 写作连接词练习：因为你的作文 coherence 连续 3 次低于目标。
+3. SRS 复习 12 个表达：因为这些表达今天到期，遗忘风险较高。
+```
+
+**用户可控项**：
+- 调整每日时长、休息日、提醒时间。
+- 对单个任务反馈「太难/太简单/不喜欢/稍后做」。
+- 在考试冲刺、日常提升、职场英语、旅行口语等模式间切换。
+- 查看「为什么推荐」和「完成后预计提升什么」。
+
+### 5.7 质量评估与风控
+
+**离线评估**：
+- 推荐命中弱项准确率：推荐任务与人工诊断弱项的一致性。
+- 难度匹配率：推荐题完成得分落在 70%-85% 区间的比例。
+- 学习效果提升：实验组相对对照组的 `ability_delta`、`mastery_gain`。
+- 题目多样性：避免同一题型、同一主题过度重复。
+
+**在线指标**：
+- 推荐点击率、开始率、完成率、跳过率。
+- 推荐后 7/14/30 天留存。
+- 周期学习效果评分提升。
+- 用户对推荐解释的满意度。
+
+**风控策略**：
+- 防止过拟合刷题：固定比例引入新主题和迁移任务。
+- 防止误伤信心：连续低分时优先降低难度并提供支架，而非直接给负向评价。
+- 防止成本失控：LLM 只参与计划解释和复杂诊断，常规排序由规则/模型服务完成。
+- 防止数据偏差：按年龄、地区、目标类型监控推荐效果差异，必要时做分层校准。
 
 ---
 
@@ -933,6 +1284,7 @@ flowchart LR
         C[客户端]
     end
     subgraph 业务模块
+        M0[登录与权限]
         M1[用户与档案]
         M2[测评]
         M3[练习与题目]
@@ -946,6 +1298,7 @@ flowchart LR
         M11[上传与媒体]
         M12[国际考试专项]
     end
+    C --> M0
     C --> M1
     C --> M2
     C --> M3
@@ -963,6 +1316,7 @@ flowchart LR
 
 | 模块编号 | 模块名称 | 职责摘要 | 主要 API（章节 8） | 主要数据（章节 7） |
 |----------|----------|----------|-------------------|---------------------|
+| **M0** | **登录与权限** | 注册/登录、Token 刷新、账号安全、角色权限、管理端鉴权、审计日志 | auth/*, users/me, admin/roles/* | users, auth_sessions, user_roles, role_permissions, auth_audit_logs |
 | **M1** | **用户与档案** | 英语档案的读写（等级、目标、提醒时间、考试类型/日期/目标分） | GET/PATCH profile | user_english_profiles |
 | **M2** | **测评** | 入学测/复测/综合测评：组卷、提交、结果汇总与 CEFR 映射 | GET assessment, POST sessions/answers, GET sessions/:id | en_questions, en_practice_sessions, en_practice_answers |
 | **M3** | **练习与题目** | 题目与内容的查询、推荐；练习会话的创建与作答提交 | GET questions, POST sessions, POST sessions/:id/answers | en_questions, en_contents, en_content_tags, en_practice_* |
@@ -978,13 +1332,14 @@ flowchart LR
 
 **模块依赖关系**：
 
+- **M0 登录与权限** 为所有 C 端、管理端接口提供认证、授权与审计能力。
 - **M2 测评** 依赖 M3（题目与会话）、M4（评分）。
 - **M5 学习计划** 依赖 M1（档案）、M10（推荐可选）、M6（触达）；备考分支依赖 M12 逻辑。
 - **M4 评价引擎** 依赖 LLM/ASR/Storage，写回 M3 使用的作答表。
 - **M7 报告** 读 M1/M3 数据，可调用 LLM 生成摘要。
 - **M12** 不单独建表，通过参数与标签扩展 M2、M3、M5。
 
-**实施建议**：MVP 可先实现 M1、M2、M3、M4、M5、M6、M7、M11；M8/M9 为管理/运营能力；M10、M12 可在二期迭代。
+**实施建议**：MVP 可先实现 M0、M1、M2、M3、M4、M5、M6、M7、M11；M8/M9 为管理/运营能力；M10、M12 可在二期迭代。
 
 ---
 
@@ -1022,6 +1377,8 @@ flowchart TB
     Gateway --> Plan
     Gateway --> Report
     Gateway --> Practice
+    Auth --> DB
+    Auth --> Cache
     Eval --> LLM
     Eval --> ASR
     Eval --> DB
@@ -1040,6 +1397,7 @@ flowchart TB
 | 服务 | 对应模块 | 职责 | 主要依赖 |
 |------|----------|------|----------|
 | **评价服务** | M4 评价引擎 | 接收练习作答（文本/音频），调用 LLM/ASR，写回得分与反馈，更新维度历史 | LLM, ASR, DB, Storage |
+| **认证授权服务** | M0 登录与权限 | 注册登录、Token 签发/刷新、会话管理、RBAC 权限校验、管理端审计 | DB, Cache, 短信/邮件服务 |
 | **练习/题目服务** | M2 测评、M3 练习与题目、M12 考试专项 | 题目与素材的 CRUD、按等级与维度推荐、练习会话的创建与提交 | DB, Cache |
 | **计划服务** | M5 学习计划、M6 督促与提醒 | 生成/更新学习计划，计算「今日任务」与完成状态，触发提醒 | LLM, DB, Push |
 | **报告服务** | M7 报告与学情 | 综合测评、周期报告、进步追踪与报告摘要生成 | LLM, DB |
@@ -1174,6 +1532,86 @@ sequenceDiagram
     end
 ```
 
+### 6.7 用户登录和权限管理模块
+
+登录与权限模块为英语学习业务提供统一身份、会话、角色权限与审计能力。账号、角色、权限模型尽量复用《公用-登录功能模块实现》和《公用-权限模块详细设计》，本文只补充英语学习域需要的角色、资源和接口约束。
+
+#### 6.7.1 角色与权限模型
+
+| 角色 | 典型用户 | 主要权限 |
+|------|----------|----------|
+| learner | 普通学习者 | 访问本人档案、计划、练习、报告、推荐、订阅状态 |
+| teacher_reviewer | 教师/评阅员 | 查看分配给自己的复核任务，提交人工评分与评语 |
+| content_admin | 内容管理员 | 管理内容、题库、标签、题目版本，查看内容质量指标 |
+| ops_admin | 运营管理员 | 查看脱敏运营报表、配置活动、处理用户申诉 |
+| system_admin | 系统管理员 | 角色权限配置、账号冻结/解封、审计日志查询 |
+
+**资源权限命名建议**：
+
+```
+english.profile:read:self
+english.profile:update:self
+english.practice:submit:self
+english.report:read:self
+english.content:write
+english.review:assign
+english.review:submit:assigned
+english.admin:metrics:read
+english.auth:user:freeze
+```
+
+权限校验采用「RBAC + 资源归属校验」：RBAC 判断用户是否具备某类操作权限，资源归属校验判断是否只能访问本人或分配给自己的数据。例如学习者访问 `/sessions/:id` 时，必须满足 `session.user_id == current_user.id`；教师访问复核任务时，必须满足 `assigned_to == current_user.id` 或具备管理分配权限。
+
+#### 6.7.2 登录与会话流程
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant C as Client
+    participant G as API Gateway
+    participant A as Auth Service
+    participant DB as DB
+    participant R as Redis/Cache
+
+    C->>G: POST /api/v1/auth/login
+    G->>A: 校验账号密码/验证码
+    A->>DB: 查询用户、密码哈希、状态
+    A->>A: 校验密码、MFA、风控规则
+    A->>R: 写入 refresh token 会话与设备信息
+    A-->>C: accessToken + refreshToken + user + permissions
+
+    C->>G: 请求英语学习接口(Authorization)
+    G->>A: 校验 accessToken 与权限
+    A-->>G: userId + roles + permissions
+    G->>G: 透传用户上下文到业务服务
+```
+
+**Token 策略**：
+- Access Token 短有效期（如 15-30 分钟），只承载 `userId`、`sessionId`、`roles`、`tokenVersion` 等必要字段。
+- Refresh Token 长有效期（如 7-30 天），服务端保存哈希，支持轮换、撤销和设备级退出。
+- 密码修改、账号冻结、角色变更时递增 `token_version`，使旧 Token 失效。
+- 管理端、教师端的敏感操作要求 MFA 或二次确认。
+
+#### 6.7.3 管理端权限矩阵
+
+| 功能 | learner | teacher_reviewer | content_admin | ops_admin | system_admin |
+|------|---------|------------------|---------------|-----------|--------------|
+| 查看本人学习报告 | 是 | 仅本人 | 仅本人 | 仅本人 | 仅本人 |
+| 提交练习/测评 | 是 | 是 | 是 | 是 | 是 |
+| 查看待复核任务 | 否 | 仅分配给自己 | 否 | 可查看状态 | 全部 |
+| 提交人工评分 | 否 | 仅分配给自己 | 否 | 否 | 可配置 |
+| 管理题库内容 | 否 | 否 | 是 | 只读 | 是 |
+| 查看运营报表 | 否 | 否 | 内容质量报表 | 是 | 是 |
+| 配置角色权限 | 否 | 否 | 否 | 否 | 是 |
+
+#### 6.7.4 审计与风控
+
+- **登录风控**：同 IP/设备短时间失败次数过多时触发验证码、冷却或临时锁定。
+- **权限审计**：记录管理端登录、角色变更、题目发布、人工评分、账号冻结、数据导出等敏感操作。
+- **数据访问审计**：教师/运营访问用户作答、报告、音频时记录访问原因和资源 ID。
+- **最小权限**：默认角色只开放必要权限；临时权限需设置过期时间。
+- **未成年人保护**：未成年账号可限制社交、排行榜、公开展示和第三方登录绑定。
+
 ## 7. 数据库设计
 
 ### 7.1 用户与档案
@@ -1257,6 +1695,33 @@ sequenceDiagram
   }
 }
 ```
+
+**学习效果评价快照表 (en_learning_effect_reports)**
+
+用于保存每日/每周/阶段性学习效果评价结果，供报告展示、推荐服务读取和 A/B 实验回溯。
+
+| 字段名 | 类型 | 约束 | 说明 |
+|--------|------|------|------|
+| id | BIGINT | PK, AUTO_INCREMENT | 主键 |
+| user_id | BIGINT | NOT NULL | 用户 ID |
+| period_type | VARCHAR(16) | NOT NULL | daily / weekly / stage / exam_countdown |
+| period_start | DATE | NOT NULL | 统计周期开始 |
+| period_end | DATE | NOT NULL | 统计周期结束 |
+| baseline_assessment_id | BIGINT | NULL | 对比基线测评 ID |
+| latest_assessment_id | BIGINT | NULL | 最新测评 ID |
+| effectiveness_score | DECIMAL(5,2) | NULL | 学习效果总分 |
+| ability_delta | JSON | NULL | 听说读写能力值变化 |
+| mastery_snapshot | JSON | NULL | 知识点/微技能掌握度快照 |
+| stability_score | DECIMAL(5,2) | NULL | 稳定性评分 |
+| transfer_score | DECIMAL(5,2) | NULL | 迁移能力评分 |
+| engagement_score | DECIMAL(5,2) | NULL | 学习投入评分 |
+| level_decision | JSON | NULL | 是否升级、预测等级、置信度和原因 |
+| diagnosis | JSON | NULL | AI 诊断、证据和下一步建议 |
+| plan_adjustment | JSON | NULL | 推荐给计划服务的调整建议 |
+| generated_by | VARCHAR(32) | NOT NULL | rule / llm / hybrid |
+| created_at | DATETIME | NOT NULL | 创建时间 |
+
+**索引**：`INDEX(user_id, period_type, period_end)`，`INDEX(user_id, created_at)`。
 
 ---
 
@@ -1374,7 +1839,7 @@ ORDER BY priority_tier, skill
 
 ---
 
-### 7.5 内容与题库标签体系
+#### 7.4.1 内容与题库标签体系
 
 为了支持「分级内容库、题目标签与元数据、口音/语速/技能点精确匹配、语义检索」，建议将「内容（文章/音频/视频/对话脚本）」与「题目」分离建模，并引入统一的标签体系。
 
@@ -1506,6 +1971,26 @@ LIMIT 30;
 
 ### 7.6 推荐日志与 A/B 实验
 
+**学习者特征快照表 (en_learner_feature_snapshots)**
+
+推荐、计划和效果评价共享的特征快照，避免各服务临时重复计算导致结果不一致。
+
+| 字段名 | 类型 | 约束 | 说明 |
+|--------|------|------|------|
+| id | BIGINT | PK, AUTO_INCREMENT | 主键 |
+| user_id | BIGINT | NOT NULL | 用户 ID |
+| snapshot_type | VARCHAR(32) | NOT NULL | daily / before_reco / before_plan / before_report |
+| ability_vector | JSON | NOT NULL | 能力向量与子维度得分 |
+| mastery_vector | JSON | NULL | 知识点、错题、SRS 掌握度 |
+| behavior_features | JSON | NULL | 完成率、时长、跳过率、活跃时段 |
+| preference_features | JSON | NULL | 话题偏好、任务偏好、设备限制 |
+| goal_features | JSON | NULL | 目标等级、考试目标、时间约束 |
+| effect_features | JSON | NULL | 最近学习效果评价摘要 |
+| feature_version | VARCHAR(32) | NOT NULL | 特征版本，便于回溯 |
+| created_at | DATETIME | NOT NULL | 创建时间 |
+
+**索引**：`INDEX(user_id, snapshot_type, created_at)`。
+
 **推荐曝光日志表 (en_reco_impressions)**（用于训练/回溯/A-B）
 
 | 字段名 | 类型 | 约束 | 说明 |
@@ -1534,6 +2019,20 @@ LIMIT 30;
 | created_at | DATETIME | NOT NULL | 创建时间 |
 
 **索引**：`INDEX(user_id, created_at)`，`INDEX(impression_id)`。
+
+**推荐策略版本表 (en_reco_policy_versions)**
+
+| 字段名 | 类型 | 约束 | 说明 |
+|--------|------|------|------|
+| id | BIGINT | PK, AUTO_INCREMENT | 主键 |
+| policy_code | VARCHAR(64) | NOT NULL | 策略编码，如 weak_skill_hybrid_v1 |
+| version | VARCHAR(32) | NOT NULL | 策略版本 |
+| config | JSON | NOT NULL | 排序权重、过滤规则、探索比例等 |
+| status | VARCHAR(20) | NOT NULL | draft / active / archived |
+| created_by | BIGINT | NULL | 创建人 |
+| created_at | DATETIME | NOT NULL | 创建时间 |
+
+**唯一约束**：`UNIQUE(policy_code, version)`；**索引**：`INDEX(status, created_at)`。
 
 **A/B 实验表 (ab_experiments)**（简化版，可与现有实验平台对接）
 
@@ -1592,6 +2091,110 @@ LIMIT 30;
 **唯一约束**：`UNIQUE(review_task_id)`；**索引**：`INDEX(reviewer_id, decided_at)`。
 
 **仲裁规则**：当 LLM/模型评分与人工评分差异超过阈值时，以人工为准并记录差异用于模型校准；也可引入二审/抽检策略（sampling_qc）。
+
+---
+
+### 7.8 登录与权限扩展表
+
+账号基础信息可复用现有 `users` 表；如现有系统尚未落库以下字段，可按本节补齐。密码、手机号、邮箱等敏感字段需加密或哈希处理。
+
+**用户基础表 (users) — 关键字段**
+
+| 字段名 | 类型 | 约束 | 说明 |
+|--------|------|------|------|
+| id | BIGINT | PK, AUTO_INCREMENT | 用户 ID |
+| email | VARCHAR(128) | UNIQUE, NULL | 邮箱 |
+| phone | VARCHAR(32) | UNIQUE, NULL | 手机号 |
+| password_hash | VARCHAR(255) | NULL | 密码哈希，第三方登录用户可为空 |
+| display_name | VARCHAR(128) | NULL | 昵称 |
+| avatar_url | VARCHAR(512) | NULL | 头像 |
+| status | VARCHAR(20) | NOT NULL | active / frozen / deleted |
+| token_version | INT | NOT NULL, DEFAULT 1 | Token 失效控制版本 |
+| last_login_at | DATETIME | NULL | 最近登录时间 |
+| created_at | DATETIME | NOT NULL | 创建时间 |
+| updated_at | DATETIME | NOT NULL | 更新时间 |
+
+**认证会话表 (auth_sessions)**
+
+| 字段名 | 类型 | 约束 | 说明 |
+|--------|------|------|------|
+| id | BIGINT | PK, AUTO_INCREMENT | 主键 |
+| user_id | BIGINT | NOT NULL, FK→users(id) | 用户 ID |
+| refresh_token_hash | VARCHAR(255) | NOT NULL | Refresh Token 哈希 |
+| device_id | VARCHAR(128) | NULL | 设备 ID |
+| device_name | VARCHAR(128) | NULL | 设备名 |
+| ip | VARCHAR(64) | NULL | 最近登录 IP |
+| user_agent | VARCHAR(512) | NULL | 客户端 UA |
+| expires_at | DATETIME | NOT NULL | 会话过期时间 |
+| revoked_at | DATETIME | NULL | 撤销时间 |
+| created_at | DATETIME | NOT NULL | 创建时间 |
+| updated_at | DATETIME | NOT NULL | 更新时间 |
+
+**索引**：`INDEX(user_id, expires_at)`，`INDEX(device_id)`。
+
+**角色表 (roles)**
+
+| 字段名 | 类型 | 约束 | 说明 |
+|--------|------|------|------|
+| id | BIGINT | PK, AUTO_INCREMENT | 主键 |
+| code | VARCHAR(64) | NOT NULL, UNIQUE | learner / teacher_reviewer / content_admin 等 |
+| name | VARCHAR(128) | NOT NULL | 角色名称 |
+| description | VARCHAR(500) | NULL | 角色说明 |
+| is_system | BOOLEAN | NOT NULL, DEFAULT FALSE | 是否系统内置 |
+| created_at | DATETIME | NOT NULL | 创建时间 |
+
+**权限表 (permissions)**
+
+| 字段名 | 类型 | 约束 | 说明 |
+|--------|------|------|------|
+| id | BIGINT | PK, AUTO_INCREMENT | 主键 |
+| code | VARCHAR(128) | NOT NULL, UNIQUE | 如 `english.report:read:self` |
+| resource | VARCHAR(64) | NOT NULL | profile / practice / report / content / review |
+| action | VARCHAR(64) | NOT NULL | read / write / submit / assign / freeze |
+| scope | VARCHAR(32) | NOT NULL | self / assigned / all |
+| description | VARCHAR(500) | NULL | 权限说明 |
+| created_at | DATETIME | NOT NULL | 创建时间 |
+
+**用户角色表 (user_roles)**
+
+| 字段名 | 类型 | 约束 | 说明 |
+|--------|------|------|------|
+| id | BIGINT | PK, AUTO_INCREMENT | 主键 |
+| user_id | BIGINT | NOT NULL, FK→users(id) | 用户 ID |
+| role_id | BIGINT | NOT NULL, FK→roles(id) | 角色 ID |
+| granted_by | BIGINT | NULL | 授权人 |
+| expires_at | DATETIME | NULL | 临时权限过期时间 |
+| created_at | DATETIME | NOT NULL | 创建时间 |
+
+**唯一约束**：`UNIQUE(user_id, role_id)`。
+
+**角色权限表 (role_permissions)**
+
+| 字段名 | 类型 | 约束 | 说明 |
+|--------|------|------|------|
+| id | BIGINT | PK, AUTO_INCREMENT | 主键 |
+| role_id | BIGINT | NOT NULL, FK→roles(id) | 角色 ID |
+| permission_id | BIGINT | NOT NULL, FK→permissions(id) | 权限 ID |
+| created_at | DATETIME | NOT NULL | 创建时间 |
+
+**唯一约束**：`UNIQUE(role_id, permission_id)`。
+
+**认证与权限审计日志表 (auth_audit_logs)**
+
+| 字段名 | 类型 | 约束 | 说明 |
+|--------|------|------|------|
+| id | BIGINT | PK, AUTO_INCREMENT | 主键 |
+| actor_user_id | BIGINT | NULL | 操作人，未登录失败事件可为空 |
+| action | VARCHAR(64) | NOT NULL | login_success / login_failed / role_grant / data_export 等 |
+| target_user_id | BIGINT | NULL | 被操作用户 |
+| resource_type | VARCHAR(64) | NULL | 资源类型 |
+| resource_id | VARCHAR(128) | NULL | 资源 ID |
+| ip | VARCHAR(64) | NULL | IP |
+| user_agent | VARCHAR(512) | NULL | UA |
+| details | JSON | NULL | 变更前后、失败原因等 |
+| created_at | DATETIME | NOT NULL | 创建时间 |
+
+**索引**：`INDEX(actor_user_id, created_at)`，`INDEX(action, created_at)`，`INDEX(target_user_id, created_at)`。
 
 ## 8. 后端 API 设计
 
@@ -1711,6 +2314,12 @@ LIMIT 30;
 - **POST /api/v1/english/report/generate**  
   生成周期报告：Body `{ "period", "startDate", "endDate" }`；触发 LLM 生成总结与建议，返回报告内容或报告 ID。
 
+- **POST /api/v1/english/report/effects/evaluate**  
+  生成学习效果与水平评价：Body `{ "periodType": "weekly", "startDate", "endDate", "forceRecompute": false }`；服务端聚合练习、测评、SRS、计划完成率与能力变化，返回 `effectivenessScore`、`levelDecision`、`skillEffects`、`nextActions`，并写入 `en_learning_effect_reports`。
+
+- **GET /api/v1/english/report/effects/latest**  
+  获取最近一次学习效果评价：Query 支持 `periodType=daily|weekly|stage`；用于首页学习报告、计划调整提示和推荐解释。
+
 ---
 
 ### 8.4 内容与题库管理（管理端）
@@ -1742,7 +2351,74 @@ LIMIT 30;
 
 - **GET /api/v1/english/srs/queue**：获取今日到期复习队列（按 `due_at` 排序，可返回 `items` + 建议时长）。
 - **POST /api/v1/english/srs/:srsItemId/review**：提交复习结果，Body `{ "rating": 0-5 }`，服务端按 SM-2/自研策略更新 `due_at/interval/ease_factor`。
-- **GET /api/v1/english/recommendations/next**：获取下一组推荐练习（可带 `scene`），返回题目/内容列表；同时写入 `en_reco_impressions`。\n+- **POST /api/v1/english/recommendations/feedback**：上报点击/完成/跳过等反馈，写入 `en_reco_feedbacks`。
+- **GET /api/v1/english/recommendations/next**：获取下一组推荐练习（可带 `scene=home_feed|next_task|plan_fill|srs_queue`、`limit`、`skill`），返回题目/内容列表、推荐理由、预计提升点；同时写入 `en_reco_impressions`。
+- **POST /api/v1/english/recommendations/plan**：生成 AI 个性化推荐学习方案。Body 可包含 `{ "targetLevel", "weeklyMinutes", "durationWeeks", "mode", "constraints" }`；服务端读取学习者特征快照和最近效果评价，返回周目标、任务配比、推荐理由与风险提示。
+- **POST /api/v1/english/recommendations/feedback**：上报点击、开始、完成、跳过、太难、太简单、不感兴趣等反馈，写入 `en_reco_feedbacks` 并用于下一次排序。
+- **GET /api/v1/english/recommendations/explain/:impressionId**：获取某次推荐的解释信息，包括触发弱项、匹配标签、难度依据、预期收益和可替换任务。
+
+### 8.8 用户登录与权限管理
+
+登录与权限接口可放在全局 `/api/v1/auth` 和 `/api/v1/admin` 下，不强行归入 `/api/v1/english`；英语学习业务接口通过网关或中间件读取统一用户上下文。
+
+#### 8.8.1 认证接口
+
+- **POST /api/v1/auth/register**  
+  注册账号：Body `{ "email?", "phone?", "password?", "verificationCode?", "displayName?" }`；注册成功后创建 `users` 记录，并可初始化 `user_english_profiles` 空档案。
+
+- **POST /api/v1/auth/login**  
+  登录：Body `{ "account", "password?", "verificationCode?", "loginType": "password|sms|email_code|oauth", "deviceId?", "deviceName?" }`；返回 `accessToken`、`refreshToken`、`user`、`roles`、`permissions`。
+
+- **POST /api/v1/auth/refresh**  
+  刷新 Token：Body `{ "refreshToken" }`；服务端校验 refresh token 哈希、会话状态和 `token_version`，成功后轮换 refresh token。
+
+- **POST /api/v1/auth/logout**  
+  退出当前设备：撤销当前 `auth_sessions`。
+
+- **POST /api/v1/auth/logout-all**  
+  退出所有设备：撤销用户全部会话；密码修改、账号冻结后也应触发。
+
+- **GET /api/v1/auth/me**  
+  获取当前登录用户：返回基础用户信息、英语档案摘要、角色和权限列表。
+
+- **PATCH /api/v1/auth/me**  
+  更新当前用户基础资料：昵称、头像、绑定邮箱/手机号等；敏感字段变更需验证码或二次验证。
+
+#### 8.8.2 权限与管理端接口
+
+- **GET /api/v1/admin/auth/users**  
+  用户列表：支持按账号、状态、角色、注册时间过滤；仅 `ops_admin` / `system_admin` 可访问。
+
+- **PATCH /api/v1/admin/auth/users/:userId/status**  
+  冻结、解冻或注销用户：Body `{ "status", "reason" }`；写入 `auth_audit_logs`。
+
+- **GET /api/v1/admin/auth/roles**  
+  查询角色列表及权限集合。
+
+- **POST /api/v1/admin/auth/roles**  
+  创建角色：Body `{ "code", "name", "permissionIds" }`；系统内置角色不可覆盖。
+
+- **PATCH /api/v1/admin/auth/roles/:roleId/permissions**  
+  更新角色权限：Body `{ "permissionIds" }`；变更后递增相关用户 `token_version` 或要求重新登录。
+
+- **POST /api/v1/admin/auth/users/:userId/roles**  
+  给用户授予角色：Body `{ "roleId", "expiresAt?", "reason" }`；支持教师、内容管理员、运营管理员授权。
+
+- **DELETE /api/v1/admin/auth/users/:userId/roles/:roleId**  
+  回收用户角色；写入审计日志。
+
+- **GET /api/v1/admin/auth/audit-logs**  
+  查询认证与权限审计日志：支持 `actorUserId`、`targetUserId`、`action`、`startDate`、`endDate` 分页过滤。
+
+#### 8.8.3 权限校验约定
+
+| API 类型 | 认证要求 | 授权要求 |
+|----------|----------|----------|
+| 注册、登录、刷新 Token | 匿名可访问 | 验证码、频控、风控校验 |
+| 学习者个人接口 | 必须登录 | `self` 资源归属校验 |
+| 练习提交/报告读取 | 必须登录 | 只能访问本人 session/report |
+| 内容管理接口 | 必须登录 | `english.content:write` |
+| 人工复核接口 | 必须登录 | `english.review:submit:assigned` 或更高权限 |
+| 系统权限配置 | 必须登录 + MFA | `english.auth:*` 或 `system_admin` |
 
 ## 9. 实现要点
 
@@ -1761,8 +2437,6 @@ LIMIT 30;
 - **成本控制**：按用户/按日限制免费评价次数，超出部分需会员或积分；LLM 与 ASR 调用做用量统计与告警。
 
 ---
-
-## 10. 技术选型建议
 
 ## 10. 技术选型建议
 
@@ -1900,12 +2574,6 @@ LIMIT 30;
 
 ### 12.1 数据与隐私
 
----
-
-## 12. 安全与合规
-
-### 12.1 数据与隐私
-
 - **采集策略**：明确告知并获取同意，最低必要原则；仅采集业务必需的语音、文本与行为数据。
 - **脱敏/加密**：语音与文本脱敏后可用于训练与评估；传输 TLS、静态数据加密（如数据库加密、对象存储加密）。
 - **存储策略**：用户可控制保存周期；敏感数据可设置自动删除或匿名化。
@@ -1913,13 +2581,17 @@ LIMIT 30;
 
 ### 12.2 身份、权限与内容安全
 
-- **身份与权限**：所有接口依赖登录态；档案、计划、作答仅限本人访问；管理端需单独权限（如教师/运营）。
+- **身份与权限**：所有业务接口默认依赖登录态；档案、计划、作答、报告仅限本人访问；管理端需通过 RBAC 权限校验与资源归属校验。
+- **Token 安全**：Access Token 短有效期，Refresh Token 服务端保存哈希并支持轮换；密码修改、账号冻结、角色变更需使旧 Token 失效。
+- **管理端安全**：教师/内容管理员/运营管理员/系统管理员分权管理；角色授权、人工评分、题目发布、账号冻结、数据导出等操作写入审计日志。
+- **防暴力破解**：登录、验证码、密码重置、Token 刷新接口按账号、IP、设备维度限流；异常登录触发验证码、MFA 或临时锁定。
+- **最小权限**：教师只能访问分配给自己的复核任务；运营默认只能查看脱敏统计；内容管理员不能读取用户私密作答与报告。
 - **内容安全**：用户文本与语音在送 LLM/ASR 前可经内容安全过滤；生成的学习建议与报告不做未授权外发。
 - **合规**：若面向未成年人，需符合当地未成年人保护与数据合规要求；教育类内容需注意版权与资质。
 
 ---
 
-## 12.3 前端与交互设计要点
+### 12.3 前端与交互设计要点
 
 ### 核心用户旅程与交互流程
 
@@ -2134,6 +2806,7 @@ flowchart TD
 
 **包含功能**：
 
+- 用户注册/登录、JWT 登录态、个人档案初始化、基础 RBAC（学习者/管理员）。
 - 入学测评（听/读/写/说的基础测）。
 - 基础题库（分级听力、阅读、写作题）与自动判分。
 - 口语跟读与基础口语评分（ASR + 发音粗评分）。
@@ -2142,7 +2815,7 @@ flowchart TD
 
 **交付周期**：3～4 个月（小团队：PM、2 后端、1 前端、1 ML 工程师、1 内容/语言专家）。
 
-**验收标准**：基础测评可运行、口语评分与人工评分相关系数达到预期阈值（例如 ≥0.7）、计划生成并能触发提醒。
+**验收标准**：用户可完成注册/登录/退出，登录态能保护个人数据；基础测评可运行，口语评分与人工评分相关系数达到预期阈值（例如 ≥0.7）；计划生成并能触发提醒。
 
 **若 MVP 含国际考试模块**：用户可完成一次雅思/托福模考流程（听/读/写/说），并得到与官方评分维度一致的预测分展示；备考计划在设定考试日期后能按三阶段（基础/强化/冲刺）生成任务。
 
@@ -2152,8 +2825,8 @@ flowchart TD
 
 | 阶段 | 周期 | 内容 |
 |------|------|------|
-| **第 0 阶段** | 2 周 | 需求梳理、目标用户访谈、题库与数据准备。 |
-| **第 1 阶段** | 6～8 周 | MVP 开发（前后端 + 基础 ASR/评分集成）+ 第一版内容。 |
+| **第 0 阶段** | 2 周 | 需求梳理、目标用户访谈、账号权限边界、题库与数据准备。 |
+| **第 1 阶段** | 6～8 周 | MVP 开发（登录/权限 + 前后端 + 基础 ASR/评分集成）+ 第一版内容。 |
 | **第 2 阶段** | 6 周 | 自适应计划引擎、间隔复习实现、强化口语评分。 |
 | **第 3 阶段** | 持续 | 模型迭代、A/B 与规模化部署、付费/教师功能。 |
 
@@ -2186,10 +2859,4 @@ flowchart TD
 
 ---
 
-## 附录 B：与现有系统的衔接
-
-- **登录与用户**：沿用现有 `users` 与 JWT；`user_english_profiles.user_id` 关联 `users.id`。
-- **推送与提醒**：使用《公用-订阅、消息推送系统设计》中的主题（如 `en_learning_remind`）、设备与发送接口；计划服务在提醒时刻构造消息并调用推送发送接口。
-- **权限**：管理端「题目管理」「人工评阅」「报告查看」等可接入《公用-权限模块》的角色与权限。
-
-以上为 AI 英语学习软件的详细设计。落地时可优先实现 [MVP 建议](#14-mvp-建议最小可行产品)（入学测 + 基础题库与自动判分 + 口语跟读与基础评分 + 计划与提醒 + 数据仪表盘），再按 [实施路线](#15-实施路线里程碑) 分阶段推进自适应计划、间隔复习、强化口语评分与付费/教师功能；后续可扩展多口音、对话式 Tutor、国际考试定制与企业/学校版（见 [后续扩展方向](#16-后续扩展方向)）。
+以上为 AI 英语学习软件的详细设计。落地时可优先实现 [MVP 建议](#14-mvp-建议最小可行产品)（登录/权限 + 入学测 + 基础题库与自动判分 + 口语跟读与基础评分 + 计划与提醒 + 数据仪表盘），再按 [实施路线](#15-实施路线里程碑) 分阶段推进自适应计划、间隔复习、强化口语评分与付费/教师功能；后续可扩展多口音、对话式 Tutor、国际考试定制与企业/学校版（见 [后续扩展方向](#16-后续扩展方向)）。
