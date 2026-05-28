@@ -103,6 +103,9 @@ anyhow = "1"
 - 工业设备说明书问答。
 - 边缘端语义搜索。
 
+**独立方案文档**
+- [Candle + Rust 本地 LLM 应用方案](./candle-rust-local-llm.md)
+
 ## 方案三：使用 llama.cpp / GGUF 运行本地大模型
 如果目标是快速运行本地 LLM，尤其是量化模型，`llama.cpp` + GGUF 是非常实用的路线。Rust 可以通过 FFI、命令行子进程、HTTP server 或相关 crate 集成。
 
@@ -170,6 +173,12 @@ async fn main() -> Result<()> {
 }
 ```
 
+## 方案三补充文档
+
+更完整的 `llama.cpp + GGUF + Rust` 本地模型应用方案已拆分到独立文档：
+
+- [llama.cpp + GGUF + Rust 本地模型应用方案](./llama-cpp-gguf-rust.md)
+
 ## 方案四：使用 Burn 构建 Rust 原生推理应用
 Burn 是 Rust 机器学习框架，适合希望 Rust 原生训练或推理的场景。
 
@@ -186,6 +195,110 @@ Burn 是 Rust 机器学习框架，适合希望 Rust 原生训练或推理的场
 
 **注意**
 Burn 生态仍在发展中。如果已有成熟 PyTorch 模型，通常先导出 ONNX 更稳。
+
+## 适合本地运行的模型链接清单
+
+以下模型优先选择开源权重、体积相对可控、生态成熟、容易通过 GGUF、ONNX、safetensors、Ollama 或 llama.cpp 在本地运行的版本。实际商用前需要检查模型 license、数据合规和部署限制。
+
+### 本地 LLM / 聊天助手
+
+| 模型 | 推荐版本 | 适合场景 | 本地运行方式 | 链接 |
+| --- | --- | --- | --- | --- |
+| Qwen3 | 0.6B / 1.7B / 4B / 8B | 中文问答、工具调用、轻量 Agent、本地助手 | GGUF、Ollama、llama.cpp、vLLM | [Hugging Face](https://huggingface.co/Qwen) / [Ollama](https://ollama.com/library/qwen3) |
+| Qwen2.5 | 0.5B / 1.5B / 3B / 7B | 中文知识库问答、摘要、分类、边缘端对话 | GGUF、Ollama、llama.cpp | [Hugging Face](https://huggingface.co/Qwen) / [Ollama](https://ollama.com/library/qwen2.5) |
+| Llama 3.2 | 1B / 3B | 英文轻量聊天、低资源设备推理 | GGUF、Ollama、llama.cpp | [Meta](https://www.llama.com/) / [Ollama](https://ollama.com/library/llama3.2) |
+| Llama 3.1 | 8B | 本地桌面助手、英文问答、代码解释 | GGUF、Ollama、llama.cpp | [Meta](https://www.llama.com/) / [Ollama](https://ollama.com/library/llama3.1) |
+| Mistral | 7B | 英文推理、摘要、通用助手 | GGUF、Ollama、llama.cpp | [Hugging Face](https://huggingface.co/mistralai) / [Ollama](https://ollama.com/library/mistral) |
+| Phi-3 / Phi-4 | Mini / Small | 低资源设备、英文推理、代码和轻量任务 | GGUF、ONNX、Ollama | [Hugging Face](https://huggingface.co/microsoft) / [Ollama](https://ollama.com/library/phi3) |
+| Gemma 2 / Gemma 3 | 2B / 9B | 本地通用问答、摘要、轻量应用 | GGUF、Ollama、llama.cpp | [Hugging Face](https://huggingface.co/google) / [Ollama](https://ollama.com/library/gemma2) |
+| DeepSeek-R1 Distill | 1.5B / 7B / 8B | 本地推理、数学、代码、复杂任务拆解 | GGUF、Ollama、llama.cpp | [Hugging Face](https://huggingface.co/deepseek-ai) / [Ollama](https://ollama.com/library/deepseek-r1) |
+| Yi | 6B / 9B | 中英文通用问答、本地知识库 | GGUF、llama.cpp | [Hugging Face](https://huggingface.co/01-ai) |
+
+**选择建议**：
+- 8GB 内存以内：优先 `0.5B`、`1.5B`、`3B` 的 Q4/Q5 量化模型。
+- 16GB 内存：可尝试 `7B/8B` Q4 量化模型。
+- 中文场景：优先 Qwen 系列、DeepSeek Distill、Yi。
+- 英文和代码场景：可选 Llama、Mistral、Phi、Gemma。
+
+### 常见 GGUF 模型下载地址
+
+常见 GGUF 模型下载地址已拆分到独立文档：
+
+- [llama.cpp + GGUF + Rust 本地模型应用方案](./llama-cpp-gguf-rust.md#常见-gguf-模型下载地址)
+
+### Embedding / 向量检索模型
+
+| 模型 | 推荐版本 | 适合场景 | 本地运行方式 | 链接 |
+| --- | --- | --- | --- | --- |
+| BGE-M3 | 多语言通用 | 中英文混合检索、长文档向量化、RAG | sentence-transformers、ONNX、Candle | [Hugging Face](https://huggingface.co/BAAI/bge-m3) |
+| BGE Small/Base ZH | small-zh / base-zh | 中文知识库、企业文档检索 | ONNX、safetensors | [BAAI](https://huggingface.co/BAAI) |
+| BGE Small/Base EN | small-en / base-en | 英文文档检索、语义搜索 | ONNX、safetensors | [BAAI](https://huggingface.co/BAAI) |
+| E5 | small / base / multilingual | 多语言检索、问答召回 | ONNX、safetensors | [intfloat](https://huggingface.co/intfloat) |
+| GTE | small / base / multilingual | 轻量语义检索、文本聚类 | ONNX、safetensors | [Alibaba-NLP](https://huggingface.co/Alibaba-NLP) |
+| all-MiniLM | L6-v2 | 英文轻量检索、低资源设备 | ONNX、safetensors | [Sentence Transformers](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2) |
+
+### Rerank / 重排序模型
+
+| 模型 | 推荐版本 | 适合场景 | 本地运行方式 | 链接 |
+| --- | --- | --- | --- | --- |
+| BGE Reranker | bge-reranker-base / large | RAG 召回后重排，提高答案相关性 | ONNX、safetensors | [BAAI](https://huggingface.co/BAAI) |
+| Jina Reranker | jina-reranker-v2-base-multilingual | 多语言重排序、中文/英文混合检索 | ONNX、safetensors | [Jina AI](https://huggingface.co/jinaai) |
+
+### 视觉模型 / 图像识别与检测
+
+| 模型 | 推荐版本 | 适合场景 | 本地运行方式 | 链接 |
+| --- | --- | --- | --- | --- |
+| YOLOv8 / YOLO11 | n / s | 目标检测、工业缺陷、摄像头告警 | ONNX、TensorRT、OpenVINO | [Ultralytics](https://github.com/ultralytics/ultralytics) |
+| YOLOv5 | n / s | 轻量目标检测、边缘设备兼容 | ONNX、TensorRT | [GitHub](https://github.com/ultralytics/yolov5) |
+| MobileNetV3 | small / large | 图像分类、低资源设备视觉识别 | ONNX、TFLite | [Torchvision](https://pytorch.org/vision/stable/models/mobilenetv3.html) |
+| EfficientNet Lite | lite0 / lite1 | 图像分类、移动端/边缘端 | ONNX、TFLite | [TensorFlow Hub](https://tfhub.dev/s?module-type=image-classification&q=efficientnet) |
+| MobileSAM | mobile_sam | 轻量图像分割、标注辅助 | ONNX、PyTorch | [GitHub](https://github.com/ChaoningZhang/MobileSAM) |
+| Segment Anything | ViT-B | 通用图像分割，桌面端或 GPU 边缘设备 | ONNX、PyTorch | [GitHub](https://github.com/facebookresearch/segment-anything) |
+| CLIP | ViT-B/32 | 图文匹配、零样本分类、图片检索 | ONNX、safetensors | [OpenAI CLIP](https://github.com/openai/CLIP) / [Hugging Face](https://huggingface.co/openai) |
+
+### OCR / 文档识别模型
+
+| 模型 | 推荐版本 | 适合场景 | 本地运行方式 | 链接 |
+| --- | --- | --- | --- | --- |
+| PaddleOCR | PP-OCRv4 / PP-OCRv5 | 中文 OCR、票据、表格、工业标牌识别 | ONNX、Paddle Inference | [GitHub](https://github.com/PaddlePaddle/PaddleOCR) |
+| RapidOCR | PP-OCR ONNX | 轻量 OCR、本地文档识别 | ONNX Runtime | [GitHub](https://github.com/RapidAI/RapidOCR) |
+| EasyOCR | 多语言 | 快速 OCR 原型、多语言文字识别 | PyTorch、可转 ONNX | [GitHub](https://github.com/JaidedAI/EasyOCR) |
+
+### 语音模型 / ASR 与 TTS
+
+| 模型 | 推荐版本 | 适合场景 | 本地运行方式 | 链接 |
+| --- | --- | --- | --- | --- |
+| Whisper | tiny / base / small | 本地语音识别、会议转写、语音指令 | whisper.cpp、ONNX | [OpenAI Whisper](https://github.com/openai/whisper) / [whisper.cpp](https://github.com/ggerganov/whisper.cpp) |
+| Faster Whisper | tiny / base / small | 更快的 Whisper 推理、GPU/CPU 转写 | CTranslate2 | [GitHub](https://github.com/SYSTRAN/faster-whisper) |
+| SenseVoice | Small | 中英文语音识别、情感/事件识别 | ONNX、PyTorch | [FunAudioLLM](https://github.com/FunAudioLLM/SenseVoice) |
+| Piper | voice models | 本地 TTS、离线语音播报 | ONNX Runtime | [GitHub](https://github.com/rhasspy/piper) |
+
+### 多模态 / 视觉语言模型
+
+| 模型 | 推荐版本 | 适合场景 | 本地运行方式 | 链接 |
+| --- | --- | --- | --- | --- |
+| Qwen2.5-VL | 3B / 7B | 图片问答、文档理解、截图分析 | Transformers、vLLM、部分 GGUF 生态 | [Hugging Face](https://huggingface.co/Qwen) |
+| LLaVA | 1.5 / 1.6 | 本地图片问答、视觉助手 | llama.cpp、Transformers | [GitHub](https://github.com/haotian-liu/LLaVA) |
+| MiniCPM-V | 2.6 / 4.0 | 轻量多模态、移动端视觉问答 | Transformers、GGUF 生态 | [Hugging Face](https://huggingface.co/openbmb) |
+| Florence-2 | base / large | 视觉检测、OCR、图像描述、多任务视觉 | ONNX、Transformers | [Hugging Face](https://huggingface.co/microsoft/Florence-2-base) |
+
+### 时间序列 / 异常检测模型
+
+| 模型 | 推荐版本 | 适合场景 | 本地运行方式 | 链接 |
+| --- | --- | --- | --- | --- |
+| Chronos | tiny / mini / small | 负荷预测、设备指标预测、边缘时间序列预测 | Transformers、ONNX 可选 | [Hugging Face](https://huggingface.co/amazon/chronos-t5-small) |
+| TimesFM | 1.0 / 2.0 | 通用时间序列预测、能耗/产线趋势预测 | JAX/Python，部署前可封装服务 | [GitHub](https://github.com/google-research/timesfm) |
+| Anomalib | PatchCore / FastFlow | 工业视觉异常检测、缺陷检测 | ONNX、OpenVINO | [GitHub](https://github.com/open-edge-platform/anomalib) |
+
+### 模型下载与检索入口
+
+| 平台 | 适合内容 | 链接 |
+| --- | --- | --- |
+| Hugging Face Models | safetensors、ONNX、Embedding、多模态模型 | [Hugging Face](https://huggingface.co/models) |
+| ModelScope | 中文模型、国内下载体验更好 | [ModelScope](https://modelscope.cn/models) |
+| ONNX Model Zoo | ONNX 示例模型 | [ONNX Model Zoo](https://github.com/onnx/models) |
+| Ultralytics | YOLO 检测模型 | [Ultralytics](https://github.com/ultralytics/ultralytics) |
+| OpenVINO Model Zoo | Intel 设备优化模型 | [OpenVINO Model Zoo](https://github.com/openvinotoolkit/open_model_zoo) |
 
 ## 模型格式选择
 
@@ -320,12 +433,14 @@ async fn main() {
 - Hugging Face 模型。
 - 使用 `safetensors` 或 ONNX。
 - Rust 使用 `candle` 或 `ort`。
+- 更完整的 Rust RAG 本地方案见：[Rust + RAG 本地大模型技术方案](./rust-rag-local-llm.md)。
 
 ### 本地聊天助手
 优先选择：
 - GGUF 量化模型。
 - `llama.cpp` 本地运行。
 - Rust 通过 HTTP 或 FFI 集成。
+- 如果需要多步骤任务、工具调用、Skills 和 MCP，可参考：[Rust + Agent 本地大模型开发方案](./rust-agent-local-llm.md)。
 
 ### 工业/电网/指挥类边缘应用
 优先组合：
